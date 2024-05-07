@@ -1,6 +1,27 @@
 
-## Revised Lab Description:
+# Generative AI Workshop: From Concept to Creation
 
+## Workshop Description
+
+### Target Audience
+Developers proficient in Python or JavaScript.
+
+### Workshop Objectives
+- Understand the fundamentals of Generative AI technology and its applications.
+- Develop a Generative AI solution using Python or JavaScript.
+- Experiment with various AI prompting techniques.
+- Implement Retrieval Augmented Generation (RAG) to enhance AI responses with external data.
+- Build a scalable AI agent capable of performing specific tasks.
+- Learn to estimate and manage the computational costs associated with running AI solutions.
+
+By completing this workshop, you'll gain the skills needed to tackle advanced development challenges in the field of Generative AI.
+
+## Scenario Story
+You've recently joined the development team at NovelReads, a thriving online bookstore with a broad range of titles and a dedicated reader community. Despite the success in sales, customer inquiries regarding book recommendations, availability, and order status updates have surged, leading to a bottleneck in customer service responses.
+
+The challenge lies in enhancing customer experience without compromising service quality. As the latest addition to the team, your mission is to design and implement a Generative AI customer support agent on the NovelReads platform. This AI should not only address common queries efficiently but also provide personalized book recommendations, thereby reducing the workload on human agents and ensuring customer satisfaction.
+
+## Lab Description:
 ### Step 1: Chat Completion (Basic)
 Set up a basic chat interface using the OpenAI API to send prompts and receive responses. This step establishes the foundation for building more complex AI interactions.
 
