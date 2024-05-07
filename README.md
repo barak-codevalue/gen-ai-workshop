@@ -16,6 +16,9 @@ Developers proficient in Python or JavaScript.
 
 By completing this workshop, you'll gain the skills needed to tackle advanced development challenges in the field of Generative AI.
 
+## Additional Resources
+For more detailed information about the APIs used in this workshop, refer to the [OpenAI Platform Documentation](https://platform.openai.com/docs/overview).
+
 ## Scenario Story
 You've recently joined the development team at NovelReads, a thriving online bookstore with a broad range of titles and a dedicated reader community. Despite the success in sales, customer inquiries regarding book recommendations, availability, and order status updates have surged, leading to a bottleneck in customer service responses.
 
