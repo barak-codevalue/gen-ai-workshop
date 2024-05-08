@@ -25,7 +25,7 @@ You've recently joined the development team at NovelReads, a thriving online boo
 The challenge lies in enhancing customer experience without compromising service quality. As the latest addition to the team, your mission is to design and implement a Generative AI customer support agent on the NovelReads platform. This AI should not only address common queries efficiently but also provide personalized book recommendations, thereby reducing the workload on human agents and ensuring customer satisfaction.
 
 ## Lab Description:
-### Step 1: Chat Completion (Basic)
+### Step 1: Chat Completion
 Set up a basic chat interface using the OpenAI API to send prompts and receive responses. This step establishes the foundation for building more complex AI interactions.
 
 **Tasks Accomplished:**
@@ -165,8 +165,10 @@ scrapeContent(url).then(paragraphs => {
 
 </details>
 
-### Step 3: Connect To Your Data (Advanced)
+### Step 3: Connect To Your Data (RAG)
 In this step, use the previously created vector database to enhance the AI’s responses. The AI will query the vector database for context relevant to the user’s queries, dynamically adjusting its responses accordingly.
+
+![alt text](assets/image.png)
 
 **Tasks Accomplished:**
 - Query the vector database for the most relevant paragraph based on the user's input.
@@ -212,6 +214,198 @@ const relevantContext = getRelevantContext("latest bestsellers", vectorData);
 
 // Simulate response from AI with the relevant context
 console.log(`AI Response: You asked about ${relevantContext}`);
+```
+
+</details>
+
+### Step 4: Managing Chat History
+Implement in-memory storage to manage chat history during an active session, allowing the AI to utilize previous interactions for better context and response personalization without the overhead of database operations.
+
+**Tasks Accomplished:**
+- Use object to store chat sessions, keeping them accessible during the server runtime.
+- Ensure that the chat history is leveraged in real-time to enhance the AI's responses.
+
+<details>
+<summary><strong>Python Code Example</strong></summary>
+
+```python
+import openai
+
+# Dictionary to store chat history, where keys are session_ids and values are lists of messages
+chat_history = {}
+
+def save_chat(session_id, messages):
+    """Save chat messages in memory."""
+    if session_id not in chat_history:
+        chat_history[session_id] = []
+    chat_history[session_id].extend(messages)
+
+def get_chat_history(session_id):
+    """Retrieve chat history from memory."""
+    return chat_history.get(session_id, [])
+
+def generate_response(session_id, user_input):
+    """Generate AI response using chat history and current input."""
+    history = get_chat_history(session_id)
+    history.append({'role': 'user', 'content': user_input})
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=history,
+        temperature=0.7
+    )
+    # Save the new user input and AI response to history
+    save_chat(session_id, [{'role': 'user', 'content': user_input}, {'role': 'assistant', 'content': response.choices[0].message['content']}])
+    return response.choices[0].message['content']
+
+# Example usage
+session_id = 'session_123'
+user_input = 'What’s the best ride for thrill-seekers?'
+print(generate_response(session_id, user_input))
+
+```
+
+</details>
+
+<details>
+<summary><strong>JavaScript Code Example</strong></summary>
+
+```javascript
+const { Configuration, OpenAIApi } = require("openai");
+
+// Object to store chat history, where keys are session_ids and values are lists of messages
+const chatHistory = {};
+
+function saveChat(sessionId, messages) {
+    /** Save chat messages in memory. */
+    if (!chatHistory[sessionId]) {
+        chatHistory[sessionId] = [];
+    }
+    chatHistory[sessionId].push(...messages);
+}
+
+function getChatHistory(sessionId) {
+    /** Retrieve chat history from memory. */
+    return chatHistory[sessionId] || [];
+}
+
+async function generateResponse(sessionId, userInput) {
+    /** Generate AI response using chat history and current input. */
+    const history = getChatHistory(sessionId);
+    history.push({role: 'user', content: userInput});
+    const configuration = new Configuration({apiKey: process.env.OPENAI_API_KEY});
+    const openai = new OpenAIApi(configuration);
+
+    const response = await openai.createChatCompletion({
+        model: "gpt-3.5-turbo",
+        messages: history,
+        temperature: 0.7
+    });
+    // Save the new user input and AI response to history
+    saveChat(sessionId, [{role: 'user', content: userInput}, {role: 'assistant', content: response.data.choices[0].message.content}]);
+    return response.data.choices[0].message.content;
+}
+
+// Example usage
+const sessionId = 'session_123';
+const userInput = 'What’s the best ride for thrill-seekers?';
+generateResponse(sessionId, userInput).then(console.log);
+
+```
+
+</details>
+
+### Step 5: Exposing the Chat as a REST API
+Develop a REST API to expose the in-memory chat functionality, allowing external applications to interact with the AI chat system through HTTP requests.
+
+**Tasks Accomplished:**
+- Set up a web server using Flask or Express.
+- Define endpoints for initiating a chat session and sending messages.
+- Implement request handling to interact with the chat system and return responses.
+
+<details>
+<summary><strong>Python Code Example</strong></summary>
+
+```python
+from flask import Flask, request, jsonify
+import openai
+
+app = Flask(__name__)
+
+# Dictionary to store chat history
+chat_history = {}
+
+@app.route('/chat', methods=['POST'])
+def chat():
+    data = request.json
+    session_id = data.get('session_id')
+    user_input = data.get('message')
+    
+    if session_id not in chat_history:
+        chat_history[session_id] = []
+    
+    history = chat_history[session_id]
+    history.append({'role': 'user', 'content': user_input})
+    
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=history,
+        temperature=0.7
+    )
+    
+    # Save response
+    chat_history[session_id].append({'role': 'assistant', 'content': response.choices[0].message['content']})
+    
+    return jsonify({'response': response.choices[0].essage['content']})
+
+if __name__ == '__main__':
+    app.run(debug=True, port=5000)
+
+```
+
+</details>
+
+<details>
+<summary><strong>JavaScript Code Example</strong></summary>
+
+```javascript
+const express = require('express');
+const { Configuration, OpenAIApi } = require("openai");
+const bodyParser = require('body-parser');
+
+const app = express();
+app.use(bodyParser.json());
+
+const chatHistory = {};
+const configuration = new Configuration({apiKey: process.env.OPENAI_API_KEY});
+const openai = new OpenAIApi(configuration);
+
+app.post('/chat', async (req, res) => {
+    const { sessionId, message } = req.body;
+    
+    if (!chatHistory[sessionId]) {
+        chatHistory[sessionId] = [];
+    }
+
+    const history = chatHistory[sessionId];
+    history.push({role: 'user', content: message});
+
+    const response = await openai.createChatCompletion({
+        model: "gpt-3.5-turbo",
+        messages: history,
+        temperature: 0.7
+    });
+
+    // Save response
+    chatHistory[sessionId].push({role: 'assistant', content: response.data.choices[0].message.content});
+
+    res.json({response: response.data.choices[0].message.content});
+});
+
+const PORT = 3000;
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
+
 ```
 
 </details>
